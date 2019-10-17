@@ -29,7 +29,18 @@ __all__ = [
     'OrdinalEncoder'
 ]
 
-
+def newTask(request):
+    if request.method == 'POST':
+        form = TaskForm(request.POST)
+        if form.is_valid():
+            task = form.save(commit=False)
+            task.done = 'doing'
+            task.save()
+            return redirect('/')
+    else:
+        form = TaskForm()
+        return render(request,'tasks/addtask.html', {'form' : form})
+    
 def _argmax(arr_or_spmatrix, axis=None):
     return arr_or_spmatrix.argmax(axis=axis)
 
