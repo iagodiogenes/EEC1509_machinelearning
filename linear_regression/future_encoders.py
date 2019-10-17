@@ -121,6 +121,9 @@ class _BaseEncoder(BaseEstimator, TransformerMixin):
     transform the input features.
 
     """
+    def taskView(request, id):
+    task = get_object_or_404(Task, pk=id)
+    return render(request, 'tasks/task.html' , {'task' : task})
 
     def _fit(self, X, handle_unknown='error'):
 
