@@ -368,7 +368,41 @@ class OneHotEncoder(_BaseEncoder):
         warnings.warn("The 'n_values' parameter is deprecated.",
                       DeprecationWarning)
         self._deprecated_n_values = value
+    def _transform(self, X, handle_unknown='error'):
 
+        X_temp = check_array(X, dtype=None)
+        if not hasattr(X, 'dtype') and np.issubdtype(X_temp.dtype, np.str_):
+            X = check_array(X, dtype=np.object)
+        else:
+            X = X_temp
+
+        _, n_features = X.shape
+        X_int = np.zeros_like(X, dtype=np.int)
+        X_mask = np.ones_like(X, dtype=np.bool)
+
+        for i in range(n_features):
+            Xi = X[:, i]
+            valid_mask = np.in1d(Xi, self.categories_[i])
+
+            if not np.all(valid_mask):
+                if handle_unknown == 'error':
+                    diff = np.unique(X[~valid_mask, i])
+                    msg = ("Found unknown categories {0} in column {1}"
+                           " during transform".format(diff, i))
+                    raise ValueError(msg)
+                else:
+                    # Set the problematic rows to an acceptable value and
+                    # continue `The rows are marked `X_mask` and will be
+                    # removed later.
+                    X_mask[:, i] = valid_mask
+                    Xi = Xi.copy()
+                    Xi[~valid_mask] = self.categories_[i][0]
+            X_int[:, i] = self._label_encoders_[i].transform(Xi)
+
+        return X_int, X_mask
+
+        
+        
     @property
     def categorical_features(self):
         warnings.warn("The 'categorical_features' parameter is deprecated.",
@@ -396,6 +430,39 @@ class OneHotEncoder(_BaseEncoder):
         warnings.warn("The 'feature_indices_' attribute is deprecated.",
                       DeprecationWarning)
         return self._feature_indices_
+
+    def _transform(self, X, handle_unknown='error'):
+
+        X_temp = check_array(X, dtype=None)
+        if not hasattr(X, 'dtype') and np.issubdtype(X_temp.dtype, np.str_):
+            X = check_array(X, dtype=np.object)
+        else:
+            X = X_temp
+
+        _, n_features = X.shape
+        X_int = np.zeros_like(X, dtype=np.int)
+        X_mask = np.ones_like(X, dtype=np.bool)
+
+        for i in range(n_features):
+            Xi = X[:, i]
+            valid_mask = np.in1d(Xi, self.categories_[i])
+
+            if not np.all(valid_mask):
+                if handle_unknown == 'error':
+                    diff = np.unique(X[~valid_mask, i])
+                    msg = ("Found unknown categories {0} in column {1}"
+                           " during transform".format(diff, i))
+                    raise ValueError(msg)
+                else:
+                    # Set the problematic rows to an acceptable value and
+                    # continue `The rows are marked `X_mask` and will be
+                    # removed later.
+                    X_mask[:, i] = valid_mask
+                    Xi = Xi.copy()
+                    Xi[~valid_mask] = self.categories_[i][0]
+            X_int[:, i] = self._label_encoders_[i].transform(Xi)
+
+        return X_int, X_mask
 
     @property
     def n_values_(self):
