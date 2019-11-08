@@ -29,7 +29,18 @@ __all__ = [
     'OrdinalEncoder'
 ]
 
-
+def newTask(request):
+    if request.method == 'POST':
+        form = TaskForm(request.POST)
+        if form.is_valid():
+            task = form.save(commit=False)
+            task.done = 'doing'
+            task.save()
+            return redirect('/')
+    else:
+        form = TaskForm()
+        return render(request,'tasks/addtask.html', {'form' : form})
+    
 def _argmax(arr_or_spmatrix, axis=None):
     return arr_or_spmatrix.argmax(axis=axis)
 
@@ -110,6 +121,9 @@ class _BaseEncoder(BaseEstimator, TransformerMixin):
     transform the input features.
 
     """
+    def taskView(request, id):
+    task = get_object_or_404(Task, pk=id)
+    return render(request, 'tasks/task.html' , {'task' : task})
 
     def _fit(self, X, handle_unknown='error'):
 
