@@ -19,6 +19,14 @@ from sklearn.preprocessing.label import LabelEncoder
 
 BOUNDS_THRESHOLD = 1e-7
 
+def listsum(numList):
+    if len(numList) == 1:
+        return numList[0]
+    else:
+        return numList[0] + listsum(numList[1:])
+
+print(listsum([1,3,5,7,9]))
+    
 
 zip = six.moves.zip
 map = six.moves.map
